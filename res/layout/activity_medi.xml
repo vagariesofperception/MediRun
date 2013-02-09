@@ -1,46 +1,91 @@
- <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/mediLayout"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:background="@color/medi_color_bkgnd"
     android:paddingLeft="16dp"
     android:paddingRight="16dp" >
-    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-         android:id="@+id/mediTable"
-         android:layout_width="fill_parent"
-         android:layout_height="fill_parent"
-         android:layout_marginTop="40sp"
-         android:stretchColumns="1"
-        >
-     <TableRow>
-         <TextView    
-       android:id="@+id/mediDate"
-       android:background="@color/medi_color_bkgnd"
-       android:textColor="@color/medi_color_fgnd"
-       android:layout_width="wrap_content"
-       android:layout_height="wrap_content"
-      
-       android:text="@string/mediDate"
-       android:textSize="30sp"
-     />
-     <TextView
-         android:id = "@+id/mediEmpty"
-         android:textColor="@color/medi_color_bkgnd"
-         android:background="@color/medi_color_bkgnd"
-         android:textSize="30sp"
-          android:layout_width="5sp"
-       android:layout_height="wrap_content"
-      />
-  <TextView    
-       android:id="@+id/mediDateVal"
-       android:layout_width="wrap_content"
-       android:layout_height="wrap_content"
-       android:background="@color/medi_color_bkgnd"
-       android:textColor="@color/medi_color_fgnd"
-       android:textSize="30sp"
-     />
- 
-     
-     </TableRow>
-     </TableLayout>
-  </RelativeLayout>
+
+    <TableLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/mediTable1"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_marginTop="40sp"
+        android:stretchColumns="1" >
+
+        <TableRow>
+
+            <TextView
+                android:id="@+id/mediDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/medi_color_bkgnd"
+                android:text="@string/mediDate"
+                android:textColor="@color/medi_color_fgnd"
+                android:textSize="30sp" />
+
+            <TextView
+                android:id="@+id/mediEmpty1"
+                android:layout_width="5sp"
+                android:layout_height="wrap_content"
+                android:background="@color/medi_color_bkgnd"
+                android:textColor="@color/medi_color_bkgnd"
+                android:textSize="30sp" />
+
+            <TextView
+                android:id="@+id/mediDateVal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/medi_color_bkgnd"
+                android:textColor="@color/medi_color_fgnd"
+                android:textSize="30sp" />
+        </TableRow>
+
+        <TableRow android:paddingTop="20dp" >
+
+            <TextView
+                android:id="@+id/mediEmpty2"
+                android:layout_width="5sp"
+                android:layout_height="wrap_content"
+                android:background="@color/medi_color_bkgnd"
+                android:textColor="@color/medi_color_bkgnd"
+                android:textSize="30sp" />
+
+            <EditText
+                android:id="@+id/mediMins"
+                android:imeOptions="actionDone"
+                android:inputType="number"
+                android:textSize="30sp" />
+
+            <TextView
+                android:id="@+id/mediDateMinText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/medi_color_bkgnd"
+                android:paddingLeft="5dp"
+                android:text="@string/mediDateMinText"
+                android:textColor="@color/medi_color_fgnd"
+                android:textSize="30sp" />
+        </TableRow>
+          
+        <TableRow android:paddingTop="20dp">
+             <TextView
+                android:id="@+id/mediEmpty3"
+                android:layout_width="10sp"
+                android:layout_height="wrap_content"
+                android:background="@color/medi_color_bkgnd"
+                android:textColor="@color/medi_color_bkgnd"
+                android:textSize="30sp" />
+             <Button
+        android:id="@+id/updateMediBtn"
+        android:layout_width="75dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:onClick="updateMediButtonClick"
+        android:text="@string/updateTxt" />
+        </TableRow>
+    </TableLayout>
+
+</RelativeLayout>

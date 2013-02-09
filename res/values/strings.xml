@@ -10,5 +10,7 @@
     <color name="medi_color_bkgnd">#000000</color>
     <color name="medi_color_fgnd">#FFFFFF</color>
     <string name="mediDate">Meditation Date</string>
+    <string name="mediDateMinText">minutes</string>
+    <string name="updateTxt">Update</string>
 
 </resources>
