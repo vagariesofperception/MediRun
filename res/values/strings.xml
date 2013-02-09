@@ -1,0 +1,11 @@
+<resources>
+
+    <string name="app_name">MediRun</string>
+    <string name="title_section3">Running</string>
+    <string name="title_section2">Meditation</string>
+    <string name="title_section1">Trends</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_medi_run_main">Meditation and Running Tracker</string>
+
+</resources>
