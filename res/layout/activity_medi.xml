@@ -56,10 +56,13 @@
                 android:id="@+id/mediMins"
                 android:imeOptions="actionDone"
                 android:inputType="number"
+                android:textColor="@color/medi_color_fgnd"
+                android:gravity="right"
+                android:background="@drawable/edittext_bg"  
                 android:textSize="30sp" />
 
             <TextView
-                android:id="@+id/mediDateMinText"
+                android:id="@+id/mediMinText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@color/medi_color_bkgnd"
