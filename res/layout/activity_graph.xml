@@ -1,0 +1,52 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/graphLayout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/medi_color_bkgnd"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp" >
+
+    <TableLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/graphTable"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_marginTop="40sp"
+        android:stretchColumns="1" >
+
+        <TableRow>
+
+            <LinearLayout android:id="@+id/chart" >
+            </LinearLayout>
+            
+        </TableRow>
+        <TableRow>
+          
+             <Button
+        android:id="@+id/backUpBtn"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:onClick="backUpBtnClick"
+        android:text="@string/backUpBtnTxt"
+        weight="1" />
+               <TextView
+                android:id="@+id/graphEmpty"
+                android:layout_height="wrap_content"
+                android:background="@color/medi_color_bkgnd"
+                android:textColor="@color/medi_color_bkgnd"
+                android:textSize="15sp"
+                weight="1" />
+                <Button
+        android:id="@+id/restoreBtn"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:onClick="restoreBtnClick"
+        android:text="@string/restoreBtnTxt"
+        weight="1" />
+             
+        </TableRow>
+    </TableLayout>
+
+</RelativeLayout>
