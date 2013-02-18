@@ -17,6 +17,7 @@ import android.util.Log;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 
 public class MediActivity extends Activity implements TextView.OnEditorActionListener {
 	private TextView mediDate;
@@ -28,8 +29,10 @@ public class MediActivity extends Activity implements TextView.OnEditorActionLis
 
 	private int currentYear, currentMonth, currentDay;
 	private int currentMediMins;
+	private Date currentDate;
 
 	public final String logTag = "MediActivity";
+	//public HashMap<Date, Integer> mediMap;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -60,6 +63,8 @@ public class MediActivity extends Activity implements TextView.OnEditorActionLis
 		currentYear = Integer.parseInt(intent.getStringExtra(MediRunMainActivity.YEAR));
 		currentMonth = Integer.parseInt(intent.getStringExtra(MediRunMainActivity.MONTH));
 		currentDay = Integer.parseInt(intent.getStringExtra(MediRunMainActivity.DAY));
+		
+		//mediMap = (HashMap) intent.getSerializableExtra(MediRunMainActivity.MEDIMAP);
 
 		Log.i(logTag, "onCreate:" +  String.valueOf(currentMonth) + "/" + 
 				String.valueOf(currentDay) + "/" + String.valueOf(currentYear));
@@ -67,6 +72,7 @@ public class MediActivity extends Activity implements TextView.OnEditorActionLis
 		Calendar cal = GregorianCalendar.getInstance();
 		cal.set(currentYear, currentMonth, currentDay);
 		d = cal.getTime();
+		currentDate = d;
 		String strDate = DateFormat.format("MMMM dd, yyyy", d).toString();
 		mediDateVal.setText(strDate);
 
@@ -74,7 +80,14 @@ public class MediActivity extends Activity implements TextView.OnEditorActionLis
 	}
 
 	public void updateMediButtonClick(View view) {
-
+		Log.i(logTag, "updateMediButtonClick called!");
+        Intent intent = new Intent(this, MediRunMainActivity.class);
+        intent.putExtra(MediRunMainActivity.CURRENT_MEDI_DATE, currentDate);
+        intent.putExtra(MediRunMainActivity.CURRENT_MEDI_MINS, String.valueOf(currentMediMins));
+        
+        // Activity finished ok, return the data
+        setResult(RESULT_OK, intent);
+        finish();
 	}
 
 	@Override
@@ -85,6 +98,8 @@ public class MediActivity extends Activity implements TextView.OnEditorActionLis
 			String s = v.getText().toString();
 			Log.i(logTag, "Medi Mins:" + s + " on " + String.valueOf(currentMonth) + "/" + 
 					String.valueOf(currentDay) + "/" + String.valueOf(currentYear));
+			currentMediMins = Integer.parseInt(s);
+			//mediMap.put(currentDate, Integer.decode(s));
 		}
 		return handled;
 	}

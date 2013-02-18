@@ -14,7 +14,8 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name=".MediRunMainActivity"
-            android:label="@string/title_activity_medi_run_main" >
+            android:label="@string/title_activity_medi_run_main"
+            android:launchMode="singleTask" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

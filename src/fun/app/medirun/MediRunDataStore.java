@@ -16,12 +16,16 @@ import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.apache.http.ParseException;
 
@@ -64,7 +68,7 @@ import com.google.gson.reflect.TypeToken;
 
 public class MediRunDataStore {
 	private static final String mediFileName = "MediData.json";
-
+	private static final String logTag = "MediRunDataStore";
 	private static volatile MediRunDataStore instance = null;
 	private File mediFile;
 
@@ -72,13 +76,13 @@ public class MediRunDataStore {
 	private Activity mActivity;
 
 	class JsonDateSerializer implements JsonSerializer<Date>
-    {
-        public JsonElement serialize(Date t, Type type, JsonSerializationContext jsc)
-        {
-        	return new JsonPrimitive(t.getTime());
-        }
-    }
-	
+	{
+		public JsonElement serialize(Date t, Type type, JsonSerializationContext jsc)
+		{
+			return new JsonPrimitive(t.getTime());
+		}
+	}
+
 	class JsonDateDeSerializer implements JsonDeserializer<Date> {
 		public Date deserialize(JsonElement json, Type typeOfT,
 				JsonDeserializationContext context) throws JsonParseException {
@@ -120,14 +124,109 @@ public class MediRunDataStore {
 		return false;
 	}
 
+	// in format dd/MM/YY
+	private Date getDateForString(String dateStr) {
+		String[] tokens = dateStr.split("/");
+		Calendar cal = Calendar.getInstance();
+		cal.set(Integer.parseInt(tokens[2]),
+				Integer.parseInt(tokens[1]),
+				Integer.parseInt(tokens[0]), 0, 0, 0);
+		return cal.getTime();
+	}
+
+	public SortedSet<Pair> getMediDataInOrderInternal() {
+		SortedSet<Pair> oList = new 
+				TreeSet<Pair>();
+		Iterator it = mediMap.entrySet().iterator();
+		while (it.hasNext())
+		{
+			Map.Entry<String, Integer> kv
+			= (Map.Entry<String, Integer>)it.next();
+
+			oList.add(new Pair(getDateForString(kv.getKey()),
+					kv.getValue()));
+			it.remove();
+		}
+		return oList;		
+	}
+
+	public boolean doesSortedListHaveDate(SortedSet<Pair> sSet, Date current)
+	{
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(current);
+		int cyear = cal.get(Calendar.YEAR);
+		int cmonth = cal.get(Calendar.MONTH);
+		int cday = cal.get(Calendar.DAY_OF_MONTH);	
+		Iterator<Pair> it = sSet.iterator();
+		while (it.hasNext())
+		{
+			Pair p = it.next();
+			Date d = p.getKey();
+			cal.setTime(d);
+			int year = cal.get(Calendar.YEAR);
+			int month = cal.get(Calendar.MONTH);
+			int day = cal.get(Calendar.DAY_OF_MONTH);
+			if (cday == day && cmonth == month && cyear == year)
+				return true;
+		}
+		return false;
+	}
+	
+	public SortedSet<Date> getSortedSetOfDates(SortedSet<Pair> sset)
+	{
+		SortedSet<Date> nSet = new TreeSet<Date>();
+		Iterator iter = sset.iterator();
+		while (iter.hasNext())
+		{
+			Pair p = (Pair)iter.next();
+			nSet.add(p.getKey());
+		}
+		return nSet;
+	}
+
+	public SortedSet<Pair> getMediDataInOrder() {
+		SortedSet<Pair> oList = getMediDataInOrderInternal();
+		SortedSet<Date> dList = getSortedSetOfDates(oList);
+		
+		Date first  = dList.first();
+		Date last = dList.last();
+		
+		if (first == last)
+			return oList; 
+
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(first);
+		int year = cal.get(Calendar.YEAR);
+		int month = cal.get(Calendar.MONTH);
+		int day = cal.get(Calendar.DAY_OF_MONTH);
+
+		Calendar cl = GregorianCalendar.getInstance();
+		cl.set(year, month, day, 0, 0, 0);
+		Date current = cl.getTime();
+		do {
+			if (doesSortedListHaveDate(oList, current) == false)
+				oList.add(new Pair(current, 0));
+
+			cal.setTime(current);
+			year = cal.get(Calendar.YEAR);
+			month = cal.get(Calendar.MONTH);
+			day = cal.get(Calendar.DAY_OF_MONTH);
+			cl.set(year, month, day, 0, 0, 0);
+			cl.add(Calendar.DATE, 1);
+			current = cl.getTime();
+			Log.i(logTag, "Current:" + current.toString());
+		} while (current != null && current.before(last));
+		return oList;
+	}
+
 	public boolean appendMediData(Date date, Integer mins) {
-	    Calendar cal = Calendar.getInstance();
-	    cal.setTime(date);
-	    int year = cal.get(Calendar.YEAR);
-	    int month = cal.get(Calendar.MONTH);
-	    int day = cal.get(Calendar.DAY_OF_MONTH);
-	    
-	    String strDate = String.valueOf(day) + "/" + String.valueOf(month) + "/" + String.valueOf(year);
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		int year = cal.get(Calendar.YEAR);
+		int month = cal.get(Calendar.MONTH);
+		int day = cal.get(Calendar.DAY_OF_MONTH);
+
+		String strDate = String.valueOf(day) + "/" + String.valueOf(month) + "/" + String.valueOf(year);
 		mediMap.put(strDate, mins);
 		// THIS IS FUNDAMENTALLY UNSCALABLE!
 		// Figure out a way to append to existing json
@@ -156,6 +255,43 @@ public class MediRunDataStore {
 			}
 		}
 		return instance;
+	}
+
+	final class Pair implements Map.Entry<Date, Integer>, Comparable<Pair> {
+		private final Date key;
+		private Integer value;
+
+		public Pair(Date key, Integer value) {
+			this.key = key;
+			this.value = value;
+		}
+
+		@Override
+		public Date getKey() {
+			return key;
+		}
+
+		@Override
+		public Integer getValue() {
+			return value;
+		}
+
+		@Override
+		public Integer setValue(Integer value) {
+			Integer old = this.value;
+			this.value = value;
+			return old;
+		}
+
+		@Override
+		public int compareTo(Pair another) {
+			if (key.getTime() < another.getKey().getTime())
+				return 1;
+			else if (key.getTime() > another.getKey().getTime())
+				return -1;
+			else
+				return 0;
+		}
 	}
 
 
