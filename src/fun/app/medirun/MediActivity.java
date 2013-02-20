@@ -64,6 +64,12 @@ public class MediActivity extends Activity implements TextView.OnEditorActionLis
 		currentMonth = Integer.parseInt(intent.getStringExtra(MediRunMainActivity.MONTH));
 		currentDay = Integer.parseInt(intent.getStringExtra(MediRunMainActivity.DAY));
 		
+		if (intent.hasExtra(MediRunMainActivity.EXISTING_MEDIMINS))
+		{
+			String preExistingMins = intent.getStringExtra(MediRunMainActivity.EXISTING_MEDIMINS);
+			mediMins.setText(preExistingMins);
+		}
+		
 		//mediMap = (HashMap) intent.getSerializableExtra(MediRunMainActivity.MEDIMAP);
 
 		Log.i(logTag, "onCreate:" +  String.valueOf(currentMonth) + "/" + 
@@ -98,7 +104,12 @@ public class MediActivity extends Activity implements TextView.OnEditorActionLis
 			String s = v.getText().toString();
 			Log.i(logTag, "Medi Mins:" + s + " on " + String.valueOf(currentMonth) + "/" + 
 					String.valueOf(currentDay) + "/" + String.valueOf(currentYear));
+			try {
 			currentMediMins = Integer.parseInt(s);
+			}
+			catch (NumberFormatException e) {
+				currentMediMins = 0;
+			}
 			//mediMap.put(currentDate, Integer.decode(s));
 		}
 		return handled;

@@ -63,6 +63,13 @@ public class RunActivity extends Activity implements TextView.OnEditorActionList
 		currentYear = Integer.parseInt(intent.getStringExtra(MediRunMainActivity.YEAR));
 		currentMonth = Integer.parseInt(intent.getStringExtra(MediRunMainActivity.MONTH));
 		currentDay = Integer.parseInt(intent.getStringExtra(MediRunMainActivity.DAY));
+		
+		if (intent.hasExtra(MediRunMainActivity.EXISTING_RUNMILES))
+		{
+			String preExistingMiles = intent.getStringExtra(MediRunMainActivity.EXISTING_RUNMILES);
+			runMiles.setText(preExistingMiles);
+		}
+		
 
 		Log.i(logTag, "onCreate:" +  String.valueOf(currentMonth) + "/" + 
 				String.valueOf(currentDay) + "/" + String.valueOf(currentYear));

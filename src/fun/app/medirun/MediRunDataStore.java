@@ -344,6 +344,12 @@ public class MediRunDataStore {
 		return oList;
 	}
 
+	private Date getDateForYYMMDD(int yy, int mm, int dd) {
+		Calendar cl = GregorianCalendar.getInstance();
+		cl.set(yy, mm, dd, 0, 0, 0);
+		Date current = cl.getTime();
+		return current;
+	}
 
 	private String getDateAsStringKey(Date date) {
 		Calendar cal = Calendar.getInstance();
@@ -400,6 +406,22 @@ public class MediRunDataStore {
 			}
 		}
 		return instance;
+	}
+	
+	public int getMediMinsForDate(int yy, int mm, int dd) {
+		Date d = getDateForYYMMDD(yy, mm, dd);
+		String key = getDateAsStringKey(d);
+		if (mediMap.containsKey(key))
+			return mediMap.get(key).intValue();
+		return 0;
+	}
+	
+	public double getRunMilesForDate(int yy, int mm, int dd) {
+		Date d = getDateForYYMMDD(yy, mm, dd);
+		String key = getDateAsStringKey(d);
+		if (runMap.containsKey(key))
+			return runMap.get(key).doubleValue();
+		return 0.0;
 	}
 
 	final class DateIntPair implements Map.Entry<Date, Integer>, Comparable<DateIntPair> {

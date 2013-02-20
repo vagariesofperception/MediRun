@@ -64,6 +64,8 @@ public class MediRunMainActivity extends FragmentActivity {
 	public final static String MEDIMAP = "fun.app.medirun.MEDIMAP";
 	public final static String CURRENT_MEDI_DATE = "fun.app.medirun.CURRENT_MEDI_DATE";
 	public final static String CURRENT_MEDI_MINS = "fun.app.medirun.CURRENT_MEDI_MINS";
+	public final static String EXISTING_MEDIMINS = "fun.app.medirun.EXISTING_MEDMINS";
+	public final static String EXISTING_RUNMILES = "fun.app.medirun.EXISTING_RUNMILES";
 
 
 	public final static String CURRENT_RUN_DATE = "fun.app.medirun.CURRENT_RUN_DATE";
@@ -75,9 +77,9 @@ public class MediRunMainActivity extends FragmentActivity {
 	private MediRunDataStore mediRunStore;
 	private static final int MEDI_ACTIVITY = 1;
 	private static final int RUN_ACTIVITY = 2;
-	private static final double TEXT_SIZE_FOR_CHART = 15.0;
+	private static final double TEXT_SIZE_FOR_CHART = 18.0;
 	private static final double LINE_WIDTH_FOR_CHART = 4.0; 
-	private static final double POINT_SIZE_FOR_CHART = 5.0;
+	private static final double POINT_SIZE_FOR_CHART = 7.0;
 
 	private GraphicalView mMediChart;
 	private GraphicalView mRunChart;
@@ -134,8 +136,8 @@ public class MediRunMainActivity extends FragmentActivity {
 		parentR.setAxisTitleTextSize((float)TEXT_SIZE_FOR_CHART);
 		parentR.setLegendTextSize((float)TEXT_SIZE_FOR_CHART);
 		parentR.setYTitle(yLabel);
-		parentR.setYLabelsAlign(Align.CENTER);
-		parentR.setXLabelsAlign(Align.CENTER);
+		//parentR.setYLabelsAlign(Align.CENTER);
+		//parentR.setXLabelsAlign(Align.CENTER);
 		currentR.setLineWidth((float)LINE_WIDTH_FOR_CHART);
 		currentR.setChartValuesTextAlign(Align.CENTER);
 		currentR.setChartValuesTextSize((float)TEXT_SIZE_FOR_CHART);
@@ -334,13 +336,6 @@ public class MediRunMainActivity extends FragmentActivity {
 		return true;
 	}
 
-	public void backUpBtnClick(View v) {
-
-	}
-
-	public void restoreBtnClick(View v) {
-
-	}
 
 	/**
 	 * A {@link FragmentPagerAdapter} that returns a fragment corresponding to one of the primary
@@ -417,6 +412,9 @@ public class MediRunMainActivity extends FragmentActivity {
 							intent.putExtra(YEAR, String.valueOf(year));
 							intent.putExtra(MONTH, String.valueOf(month));
 							intent.putExtra(DAY, String.valueOf(dayOfMonth));
+							int mins = mediRunStore.getMediMinsForDate(year, month, dayOfMonth);
+							if (mins != 0)
+								intent.putExtra(EXISTING_MEDIMINS, String.valueOf(mins));
 							getActivity().startActivityForResult(intent, MEDI_ACTIVITY);
 
 						}
@@ -434,6 +432,9 @@ public class MediRunMainActivity extends FragmentActivity {
 							intent.putExtra(YEAR, String.valueOf(year));
 							intent.putExtra(MONTH, String.valueOf(month));
 							intent.putExtra(DAY, String.valueOf(dayOfMonth));
+							double miles = mediRunStore.getRunMilesForDate(year, month, dayOfMonth);
+							if (miles != 0)
+								intent.putExtra(EXISTING_RUNMILES, String.valueOf(miles));
 							getActivity().startActivityForResult(intent, RUN_ACTIVITY);
 
 						}

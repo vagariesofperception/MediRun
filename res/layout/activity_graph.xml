@@ -30,34 +30,6 @@
             </LinearLayout>
         </TableRow>
 
-        <TableRow android:layout_weight="0.00" >
-
-            <Button
-                android:id="@+id/backUpBtn"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentRight="true"
-                android:layout_weight="0.4"
-                android:onClick="backUpBtnClick"
-                android:text="@string/backUpBtnTxt" />
-
-            <TextView
-                android:id="@+id/graphEmpty"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.2"
-                android:background="@color/medi_color_bkgnd"
-                android:textColor="@color/medi_color_bkgnd"
-                android:textSize="15sp" />
-
-            <Button
-                android:id="@+id/restoreBtn"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentRight="true"
-                android:layout_weight="0.4"
-                android:onClick="restoreBtnClick"
-                android:text="@string/restoreBtnTxt" />
-        </TableRow>
     </TableLayout>
 
 </RelativeLayout>

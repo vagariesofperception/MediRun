@@ -95,7 +95,7 @@
 
             <Button
                 android:id="@+id/updateMediBtn"
-                android:layout_width="75dp"
+                android:layout_width="85dp"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentRight="true"
