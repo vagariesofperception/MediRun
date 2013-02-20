@@ -8,12 +8,13 @@
         android:targetSdkVersion="15" />
 
     <application
+        android:debuggable="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:debuggable="true"
         android:theme="@style/AppTheme" >
         <activity
             android:name=".MediRunMainActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_medi_run_main"
             android:launchMode="singleTask" >
             <intent-filter>
@@ -22,8 +23,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MediActivity"></activity>
-        <activity android:name=".RunActivity"></activity>
+        <activity
+            android:name=".MediActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" >
+        </activity>
+        <activity
+            android:name=".RunActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" >
+        </activity>
     </application>
 
 </manifest>

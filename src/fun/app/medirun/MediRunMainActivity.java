@@ -25,6 +25,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Paint.Align;
 import android.media.AudioRecord.OnRecordPositionUpdateListener;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -74,6 +75,9 @@ public class MediRunMainActivity extends FragmentActivity {
 	private MediRunDataStore mediRunStore;
 	private static final int MEDI_ACTIVITY = 1;
 	private static final int RUN_ACTIVITY = 2;
+	private static final double TEXT_SIZE_FOR_CHART = 15.0;
+	private static final double LINE_WIDTH_FOR_CHART = 4.0; 
+	private static final double POINT_SIZE_FOR_CHART = 5.0;
 
 	private GraphicalView mMediChart;
 	private GraphicalView mRunChart;
@@ -115,6 +119,27 @@ public class MediRunMainActivity extends FragmentActivity {
 		mCurrentRunRenderer = new XYSeriesRenderer();
 		mRunRenderer.addSeriesRenderer(mCurrentRunRenderer);
 	}
+	
+	private void setChartProperties(XYMultipleSeriesRenderer parentR, XYSeriesRenderer currentR, Date minDate, Date maxDate, String yLabel, int color, PointStyle pointStyle) {
+		parentR.setXAxisMin(minDate.getTime());
+		parentR.setXAxisMax(maxDate.getTime());
+		parentR.setYAxisMin(0.0);
+		currentR.setColor(color);
+		currentR.setPointStyle(pointStyle);
+		currentR.setFillPoints(true);
+		
+		parentR.setShowGrid(true);
+		parentR.setPointSize((float)POINT_SIZE_FOR_CHART);
+		parentR.setLabelsTextSize((float)TEXT_SIZE_FOR_CHART);
+		parentR.setAxisTitleTextSize((float)TEXT_SIZE_FOR_CHART);
+		parentR.setLegendTextSize((float)TEXT_SIZE_FOR_CHART);
+		parentR.setYTitle(yLabel);
+		parentR.setYLabelsAlign(Align.CENTER);
+		parentR.setXLabelsAlign(Align.CENTER);
+		currentR.setLineWidth((float)LINE_WIDTH_FOR_CHART);
+		currentR.setChartValuesTextAlign(Align.CENTER);
+		currentR.setChartValuesTextSize((float)TEXT_SIZE_FOR_CHART);
+	}
 
 	private boolean addMediData() {
 
@@ -146,12 +171,7 @@ public class MediRunMainActivity extends FragmentActivity {
 		}
 		if (minDate == null || maxDate == null)
 			return false;
-		mMediRenderer.setXAxisMin(minDate.getTime());
-		mMediRenderer.setXAxisMax(maxDate.getTime());
-		mMediRenderer.setYAxisMin(0.0);
-		mCurrentMediRenderer.setColor(Color.RED);
-		mCurrentMediRenderer.setPointStyle(PointStyle.DIAMOND);
-		mCurrentMediRenderer.setFillPoints(true);
+		setChartProperties(mMediRenderer, mCurrentMediRenderer, minDate, maxDate, new String("Meditation Mins"), Color.RED, PointStyle.DIAMOND);
 		return true;
 
 	}
@@ -189,14 +209,8 @@ public class MediRunMainActivity extends FragmentActivity {
 		}
 		if (minDate == null || maxDate == null)
 			return false;
-		mRunRenderer.setXAxisMin(minDate.getTime());
-		mRunRenderer.setXAxisMax(maxDate.getTime());
-		mRunRenderer.setYAxisMin(0.0);
-		if (maxMiles > 0)
-			mRunRenderer.setYAxisMax(maxMiles);
-		mCurrentRunRenderer.setColor(Color.GREEN);
-		mCurrentRunRenderer.setPointStyle(PointStyle.CIRCLE);
-		mCurrentRunRenderer.setFillPoints(true);
+		
+		setChartProperties(mRunRenderer, mCurrentRunRenderer, minDate, maxDate, new String("Run Miles"), Color.GREEN, PointStyle.CIRCLE);		
 		return true;
 
 	}
@@ -233,7 +247,6 @@ public class MediRunMainActivity extends FragmentActivity {
 			
 			@Override
 			public void onPageScrolled(int arg0, float arg1, int arg2) {
-				// TODO Auto-generated method stub
 				Log.i(logTag, "onPageScrolled:" + String.valueOf(arg0) + "," + 
 						String.valueOf(arg1) + "," + String.valueOf(arg2));
 
@@ -241,7 +254,6 @@ public class MediRunMainActivity extends FragmentActivity {
 			
 			@Override
 			public void onPageScrollStateChanged(int arg0) {
-				// TODO Auto-generated method stub
 				Log.i(logTag, "onPageScrollStateChanged:" + String.valueOf(arg0));
 
 			}

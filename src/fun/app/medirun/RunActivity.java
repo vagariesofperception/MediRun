@@ -63,7 +63,7 @@ public class RunActivity extends Activity implements TextView.OnEditorActionList
 		currentYear = Integer.parseInt(intent.getStringExtra(MediRunMainActivity.YEAR));
 		currentMonth = Integer.parseInt(intent.getStringExtra(MediRunMainActivity.MONTH));
 		currentDay = Integer.parseInt(intent.getStringExtra(MediRunMainActivity.DAY));
-		
+
 		Log.i(logTag, "onCreate:" +  String.valueOf(currentMonth) + "/" + 
 				String.valueOf(currentDay) + "/" + String.valueOf(currentYear));
 		Date d = null;
@@ -79,13 +79,13 @@ public class RunActivity extends Activity implements TextView.OnEditorActionList
 
 	public void updateRunButtonClick(View view) {
 		Log.i(logTag, "updateRunButton called!");
-        Intent intent = new Intent(this, MediRunMainActivity.class);
-        intent.putExtra(MediRunMainActivity.CURRENT_RUN_DATE, currentDate);
-        intent.putExtra(MediRunMainActivity.CURRENT_RUN_MILES, String.valueOf(currentRunMiles));
-        
-        // Activity finished ok, return the data
-        setResult(RESULT_OK, intent);
-        finish();
+		Intent intent = new Intent(this, MediRunMainActivity.class);
+		intent.putExtra(MediRunMainActivity.CURRENT_RUN_DATE, currentDate);
+		intent.putExtra(MediRunMainActivity.CURRENT_RUN_MILES, String.valueOf(currentRunMiles));
+
+		// Activity finished ok, return the data
+		setResult(RESULT_OK, intent);
+		finish();
 	}
 
 	@Override
@@ -96,7 +96,11 @@ public class RunActivity extends Activity implements TextView.OnEditorActionList
 			String s = v.getText().toString();
 			Log.i(logTag, "Run Miles:" + s + " on " + String.valueOf(currentMonth) + "/" + 
 					String.valueOf(currentDay) + "/" + String.valueOf(currentYear));
-			currentRunMiles = Double.parseDouble(s);
+			try {
+				currentRunMiles = Double.parseDouble(s);
+			} catch (NumberFormatException e) {
+				currentRunMiles = new Double(0.0);
+			}
 		}
 		return handled;
 	}
