@@ -68,11 +68,13 @@ import com.google.gson.reflect.TypeToken;
 
 public class MediRunDataStore {
 	private static final String mediFileName = "MediData.json";
+	private static final String runFileName = "RunData.json";
 	private static final String logTag = "MediRunDataStore";
 	private static volatile MediRunDataStore instance = null;
 	private File mediFile;
 
 	private HashMap<String, Integer> mediMap;
+	private HashMap<String, Double> runMap;
 	private Activity mActivity;
 
 	class JsonDateSerializer implements JsonSerializer<Date>
@@ -95,6 +97,7 @@ public class MediRunDataStore {
 
 	public boolean bootUpMediData(Activity mainActivity)
 	{
+		Log.i(logTag, "bootUpMediData called!");
 		if (mActivity == null)
 			mActivity = mainActivity;
 		JsonParser parser = new JsonParser();
@@ -111,16 +114,49 @@ public class MediRunDataStore {
 			return true;
 		}
 		catch (FileNotFoundException e) {
+			Log.i(logTag, "mediFileNotFound");
 			e.printStackTrace();
 		}
-		catch (IOException e) {
-			e.printStackTrace();
-		}
-		catch (ParseException e) {
+		catch (Exception e) {
+			Log.i(logTag, "some other exception on medi file open");
 			e.printStackTrace();
 		}
 		if (mediMap == null)
 			mediMap = new HashMap<String, Integer>();
+		Log.i(logTag, "Size of mediMap:" + String.valueOf(mediMap.size()));
+		return false;
+	}
+	
+	public boolean bootUpRunData(Activity mainActivity) {
+
+		Log.i(logTag, "bootUpRunData called!");
+		if (mActivity == null)
+			mActivity = mainActivity;
+		JsonParser parser = new JsonParser();
+		try {
+			FileInputStream fis =  mActivity.openFileInput(runFileName);
+			BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
+			Object obj = parser.parse(reader);
+			JsonObject jsonObject = (JsonObject) obj;
+			String jStr = jsonObject.toString();
+			Gson gson = new GsonBuilder().create();
+			Type typeOfHashMap = new TypeToken<Map<String, Double>>() { }.getType();
+			runMap = gson.fromJson(jStr, typeOfHashMap);
+			return true;
+		}
+
+		catch (FileNotFoundException e) {
+			Log.i(logTag, "runFilenotfound");
+			e.printStackTrace();
+		}
+		catch (Exception e) {
+			Log.i(logTag, "some other exception on run file open");
+			e.printStackTrace();
+		}
+		if (runMap == null)
+			runMap = new HashMap<String, Double>();
+
+		Log.i(logTag, "Size of runMap:" + String.valueOf(runMap.size()));
 		return false;
 	}
 
@@ -134,33 +170,32 @@ public class MediRunDataStore {
 		return cal.getTime();
 	}
 
-	public SortedSet<Pair> getMediDataInOrderInternal() {
-		SortedSet<Pair> oList = new 
-				TreeSet<Pair>();
+	public SortedSet<DateIntPair> getMediDataInOrderInternal() {
+		SortedSet<DateIntPair> oList = new 
+				TreeSet<DateIntPair>();
 		Iterator it = mediMap.entrySet().iterator();
 		while (it.hasNext())
 		{
 			Map.Entry<String, Integer> kv
 			= (Map.Entry<String, Integer>)it.next();
 
-			oList.add(new Pair(getDateForString(kv.getKey()),
+			oList.add(new DateIntPair(getDateForString(kv.getKey()),
 					kv.getValue()));
-			it.remove();
 		}
 		return oList;		
 	}
 
-	public boolean doesSortedListHaveDate(SortedSet<Pair> sSet, Date current)
+	public boolean doesSortedListHaveDate(SortedSet<DateIntPair> sSet, Date current)
 	{
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(current);
 		int cyear = cal.get(Calendar.YEAR);
 		int cmonth = cal.get(Calendar.MONTH);
 		int cday = cal.get(Calendar.DAY_OF_MONTH);	
-		Iterator<Pair> it = sSet.iterator();
+		Iterator<DateIntPair> it = sSet.iterator();
 		while (it.hasNext())
 		{
-			Pair p = it.next();
+			DateIntPair p = it.next();
 			Date d = p.getKey();
 			cal.setTime(d);
 			int year = cal.get(Calendar.YEAR);
@@ -172,21 +207,24 @@ public class MediRunDataStore {
 		return false;
 	}
 	
-	public SortedSet<Date> getSortedSetOfDates(SortedSet<Pair> sset)
+	public SortedSet<Date> getSortedSetOfDates(SortedSet<DateIntPair> sset)
 	{
 		SortedSet<Date> nSet = new TreeSet<Date>();
 		Iterator iter = sset.iterator();
 		while (iter.hasNext())
 		{
-			Pair p = (Pair)iter.next();
+			DateIntPair p = (DateIntPair)iter.next();
 			nSet.add(p.getKey());
 		}
 		return nSet;
 	}
 
-	public SortedSet<Pair> getMediDataInOrder() {
-		SortedSet<Pair> oList = getMediDataInOrderInternal();
+	public SortedSet<DateIntPair> getMediDataInOrder() {
+		SortedSet<DateIntPair> oList = getMediDataInOrderInternal();
 		SortedSet<Date> dList = getSortedSetOfDates(oList);
+		
+		if (dList.size() == 0)
+			return oList;
 		
 		Date first  = dList.first();
 		Date last = dList.last();
@@ -205,7 +243,94 @@ public class MediRunDataStore {
 		Date current = cl.getTime();
 		do {
 			if (doesSortedListHaveDate(oList, current) == false)
-				oList.add(new Pair(current, 0));
+				oList.add(new DateIntPair(current, 0));
+
+			cal.setTime(current);
+			year = cal.get(Calendar.YEAR);
+			month = cal.get(Calendar.MONTH);
+			day = cal.get(Calendar.DAY_OF_MONTH);
+			cl.set(year, month, day, 0, 0, 0);
+			cl.add(Calendar.DATE, 1);
+			current = cl.getTime();
+			Log.i(logTag, "Current:" + current.toString());
+		} while (current != null && current.before(last));
+		return oList;
+	}
+	
+	public SortedSet<DateDoublePair> getRunDataInOrderInternal() {
+		SortedSet<DateDoublePair> oList = new 
+				TreeSet<DateDoublePair>();
+		Iterator it = runMap.entrySet().iterator();
+		while (it.hasNext())
+		{
+			Map.Entry<String, Double> kv
+			= (Map.Entry<String, Double>)it.next();
+
+			oList.add(new DateDoublePair(getDateForString(kv.getKey()),
+					kv.getValue()));
+		}
+		return oList;		
+	}
+
+	public boolean doesSortedListHaveThisDate(SortedSet<DateDoublePair> sSet, Date current)
+	{
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(current);
+		int cyear = cal.get(Calendar.YEAR);
+		int cmonth = cal.get(Calendar.MONTH);
+		int cday = cal.get(Calendar.DAY_OF_MONTH);	
+		Iterator<DateDoublePair> it = sSet.iterator();
+		while (it.hasNext())
+		{
+			DateDoublePair p = it.next();
+			Date d = p.getKey();
+			cal.setTime(d);
+			int year = cal.get(Calendar.YEAR);
+			int month = cal.get(Calendar.MONTH);
+			int day = cal.get(Calendar.DAY_OF_MONTH);
+			if (cday == day && cmonth == month && cyear == year)
+				return true;
+		}
+		return false;
+	}
+	
+	public SortedSet<Date> getASortedSetOfDates(SortedSet<DateDoublePair> sset)
+	{
+		SortedSet<Date> nSet = new TreeSet<Date>();
+		Iterator iter = sset.iterator();
+		while (iter.hasNext())
+		{
+			DateDoublePair p = (DateDoublePair)iter.next();
+			nSet.add(p.getKey());
+		}
+		return nSet;
+	}
+
+	public SortedSet<DateDoublePair> getRunDataInOrder() {
+		SortedSet<DateDoublePair> oList = getRunDataInOrderInternal();
+		SortedSet<Date> dList = getASortedSetOfDates(oList);
+		
+		if (dList.size() == 0)
+			return oList;
+		
+		Date first  = dList.first();
+		Date last = dList.last();
+		
+		if (first == last)
+			return oList; 
+
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(first);
+		int year = cal.get(Calendar.YEAR);
+		int month = cal.get(Calendar.MONTH);
+		int day = cal.get(Calendar.DAY_OF_MONTH);
+
+		Calendar cl = GregorianCalendar.getInstance();
+		cl.set(year, month, day, 0, 0, 0);
+		Date current = cl.getTime();
+		do {
+			if (doesSortedListHaveThisDate(oList, current) == false)
+				oList.add(new DateDoublePair(current, 0.0));
 
 			cal.setTime(current);
 			year = cal.get(Calendar.YEAR);
@@ -219,7 +344,8 @@ public class MediRunDataStore {
 		return oList;
 	}
 
-	public boolean appendMediData(Date date, Integer mins) {
+
+	private String getDateAsStringKey(Date date) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(date);
 		int year = cal.get(Calendar.YEAR);
@@ -227,26 +353,45 @@ public class MediRunDataStore {
 		int day = cal.get(Calendar.DAY_OF_MONTH);
 
 		String strDate = String.valueOf(day) + "/" + String.valueOf(month) + "/" + String.valueOf(year);
-		mediMap.put(strDate, mins);
-		// THIS IS FUNDAMENTALLY UNSCALABLE!
-		// Figure out a way to append to existing json
-		// and not serialize everything on every append
+		return strDate;
+	}
+	
+	// THIS IS FUNDAMENTALLY UNSCALABLE!
+	// Figure out a way to append to existing json
+	// and not serialize everything on every append
+	private boolean saveMapAsJsonToFile(HashMap mMap, String fileName) {
 		GsonBuilder gsb = new GsonBuilder();
-		//gsb.registerTypeAdapter(Date.class, new JsonDateSerializer());
 		Gson gson = gsb.create();
-		String json = gson.toJson(mediMap);
+		String json = gson.toJson(mMap);
 		Log.i(MediRunMainActivity.logTag, "JSON:" + json);
 		try {
-			FileOutputStream fos = mActivity.openFileOutput(mediFileName, Context.MODE_PRIVATE);
+			FileOutputStream fos = mActivity.openFileOutput(fileName, Context.MODE_PRIVATE);
 			fos.write(json.getBytes());
 			fos.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 			return false;
 		}
-		return true;
+	   return true;
+	}
+	
+	public boolean appendMediData(Date date, Integer mins) {
+		String strDate = getDateAsStringKey(date);
+		mediMap.put(strDate, mins);
+        return saveMapAsJsonToFile(mediMap, mediFileName);
+	}
+	
+	public boolean appendRunData(Date date, Double miles) {
+		String strDate = getDateAsStringKey(date);
+		runMap.put(strDate, miles);
+		return saveMapAsJsonToFile(runMap, runFileName);
 	}
 
+	public void flushMediRunData() {
+		saveMapAsJsonToFile(mediMap, mediFileName);
+		saveMapAsJsonToFile(runMap, runFileName);
+	}
+	
 	public static MediRunDataStore getInstance() {
 		if (instance == null) {
 			synchronized (MediRunDataStore.class) {
@@ -257,11 +402,11 @@ public class MediRunDataStore {
 		return instance;
 	}
 
-	final class Pair implements Map.Entry<Date, Integer>, Comparable<Pair> {
+	final class DateIntPair implements Map.Entry<Date, Integer>, Comparable<DateIntPair> {
 		private final Date key;
 		private Integer value;
 
-		public Pair(Date key, Integer value) {
+		public DateIntPair(Date key, Integer value) {
 			this.key = key;
 			this.value = value;
 		}
@@ -284,7 +429,44 @@ public class MediRunDataStore {
 		}
 
 		@Override
-		public int compareTo(Pair another) {
+		public int compareTo(DateIntPair another) {
+			if (key.getTime() < another.getKey().getTime())
+				return 1;
+			else if (key.getTime() > another.getKey().getTime())
+				return -1;
+			else
+				return 0;
+		}
+	}
+
+	final class DateDoublePair implements Map.Entry<Date, Double>, Comparable<DateDoublePair> {
+		private final Date key;
+		private Double value;
+
+		public DateDoublePair(Date key, Double value) {
+			this.key = key;
+			this.value = value;
+		}
+
+		@Override
+		public Date getKey() {
+			return key;
+		}
+
+		@Override
+		public Double getValue() {
+			return value;
+		}
+
+		@Override
+		public Double setValue(Double value) {
+			Double old = this.value;
+			this.value = value;
+			return old;
+		}
+
+		@Override
+		public int compareTo(DateDoublePair another) {
 			if (key.getTime() < another.getKey().getTime())
 				return 1;
 			else if (key.getTime() > another.getKey().getTime())

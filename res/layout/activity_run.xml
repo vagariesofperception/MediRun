@@ -1,0 +1,120 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/runLayout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/run_color_bkgnd"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp" >
+
+    <TableLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/runTable1"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_marginTop="40sp"
+        android:stretchColumns="1" >
+
+        <TableRow android:layout_weight="0.20" >
+
+            <TextView
+                android:id="@+id/runDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.50"
+                android:background="@color/run_color_bkgnd"
+                android:text="@string/runDate"
+                android:textColor="@color/run_color_fgnd"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/runEmpty1"
+                android:layout_width="5sp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.2"
+                android:background="@color/run_color_bkgnd"
+                android:textColor="@color/run_color_bkgnd"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/runDateVal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:background="@color/run_color_bkgnd"
+                android:textColor="@color/run_color_fgnd"
+                android:textSize="15sp" />
+        </TableRow>
+
+        <TableRow
+            android:layout_weight="0.20"
+            android:paddingTop="20dp" >
+
+            <TextView
+                android:id="@+id/runEmpty2"
+                android:layout_width="5sp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.30"
+                android:background="@color/run_color_bkgnd"
+                android:textColor="@color/run_color_bkgnd"
+                android:textSize="15sp" />
+
+            <EditText
+                android:id="@+id/runMiles"
+                android:layout_weight="0.40"
+                android:background="@drawable/edittext_bg"
+                android:gravity="right"
+                android:imeOptions="actionDone"
+                android:inputType="numberDecimal"
+                android:textColor="@color/run_color_fgnd"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/runMilesText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.30"
+                android:background="@color/run_color_bkgnd"
+                android:paddingLeft="5dp"
+                android:text="@string/runMilesText"
+                android:textColor="@color/run_color_fgnd"
+                android:textSize="15sp" />
+        </TableRow>
+
+        <TableRow
+            android:layout_weight="0.2"
+            android:paddingTop="20dp" >
+
+            <TextView
+                android:id="@+id/runEmpty3"
+                android:layout_width="10sp"
+                android:layout_height="wrap_content"
+                weight="1"
+                android:background="@color/run_color_bkgnd"
+                android:textColor="@color/run_color_bkgnd"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/updateRunBtn"
+                android:layout_width="75dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                weight="1"
+                android:onClick="updateRunButtonClick"
+                android:text="@string/updateTxt" />
+
+            <TextView
+                android:id="@+id/runEmpty4"
+                android:layout_width="10sp"
+                android:layout_height="wrap_content"
+                weight="1"
+                android:background="@color/run_color_bkgnd"
+                android:textColor="@color/run_color_bkgnd"
+                android:textSize="15sp" />
+        </TableRow>
+
+        <TableRow android:layout_weight="0.4" >
+        </TableRow>
+    </TableLayout>
+
+</RelativeLayout>

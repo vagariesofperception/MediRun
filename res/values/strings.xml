@@ -12,7 +12,12 @@
     <color name="medi_mins_color_bkgnd">#f7f9f6</color>
     <string name="mediDate">Meditation Date</string>
     <string name="mediDateMinText">minutes</string>
-    <string name="updateTxt">Update</string>
     <string name="restoreBtnTxt">Restore</string>
     <string name="backUpBtnTxt">Backup</string>
+    <color name="run_color_bkgnd">#000000</color>
+    <color name="run_color_fgnd">#FFFFFF</color>
+    <color name="run_mins_color_bkgnd">#f7f9f6</color>
+    <string name="runDate">Run Date</string>
+    <string name="runMilesText">miles</string>
+    <string name="updateTxt">Update</string>
 </resources>
