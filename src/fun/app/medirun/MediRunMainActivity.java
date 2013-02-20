@@ -277,8 +277,8 @@ public class MediRunMainActivity extends FragmentActivity {
 		mMediChart = ChartFactory.getTimeChartView(
 				this,
 				mMediDataset, 
-				mMediRenderer, 
-				null);
+				mMediRenderer, "MMM dd, yyyy");
+				//null);
 		mcl.addView(mMediChart);
 	}
 
@@ -289,8 +289,8 @@ public class MediRunMainActivity extends FragmentActivity {
 		mRunChart = ChartFactory.getTimeChartView(
 				this,
 				mRunDataset, 
-				mRunRenderer, 
-				null);
+				mRunRenderer, "MMM dd, yyyy");
+				//null);
 		rcl.addView(mRunChart);
 	}
 
