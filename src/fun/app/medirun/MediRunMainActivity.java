@@ -47,6 +47,7 @@ import android.webkit.WebView.FindListener;
 import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.CalendarView.OnDateChangeListener;
 import android.widget.TabHost.OnTabChangeListener;
@@ -113,6 +114,7 @@ public class MediRunMainActivity extends FragmentActivity {
 		mMediDataset.addSeries(mCurrentMediSeries);
 		mCurrentMediRenderer = new XYSeriesRenderer();
 		mMediRenderer.addSeriesRenderer(mCurrentMediRenderer);
+		//setChartProperties(mMediRenderer, mCurrentMediRenderer, null, null, new String("Meditation Mins"), Color.RED, PointStyle.DIAMOND);
 	}
 
 	private void initRunChart() {
@@ -120,11 +122,14 @@ public class MediRunMainActivity extends FragmentActivity {
 		mRunDataset.addSeries(mCurrentRunSeries);
 		mCurrentRunRenderer = new XYSeriesRenderer();
 		mRunRenderer.addSeriesRenderer(mCurrentRunRenderer);
+		//setChartProperties(mRunRenderer, mCurrentRunRenderer, null, null, new String("Run Miles"), Color.GREEN, PointStyle.CIRCLE);	
 	}
 	
 	private void setChartProperties(XYMultipleSeriesRenderer parentR, XYSeriesRenderer currentR, Date minDate, Date maxDate, String yLabel, int color, PointStyle pointStyle) {
-		parentR.setXAxisMin(minDate.getTime());
-		parentR.setXAxisMax(maxDate.getTime());
+		if (minDate != null)
+		  parentR.setXAxisMin(minDate.getTime());
+		if (maxDate != null)
+		  parentR.setXAxisMax(maxDate.getTime());
 		parentR.setYAxisMin(0.0);
 		currentR.setColor(color);
 		currentR.setPointStyle(pointStyle);
@@ -173,6 +178,7 @@ public class MediRunMainActivity extends FragmentActivity {
 		}
 		if (minDate == null || maxDate == null)
 			return false;
+		Log.i(logTag, "minDate:" + minDate.toString() + ", maxDate:" + maxDate.toString());
 		setChartProperties(mMediRenderer, mCurrentMediRenderer, minDate, maxDate, new String("Meditation Mins"), Color.RED, PointStyle.DIAMOND);
 		return true;
 
@@ -260,6 +266,16 @@ public class MediRunMainActivity extends FragmentActivity {
 
 			}
 		});
+		mViewPager.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+                Log.i(logTag, "mViewPager: Got click!");
+				refreshOrCreateMediChart();
+				refreshOrCreateRunChart();
+			}
+		});
 	}
 
 	@Override
@@ -292,6 +308,7 @@ public class MediRunMainActivity extends FragmentActivity {
 				mRunRenderer, "MMM dd, yyyy");
 				//null);
 		rcl.addView(mRunChart);
+		
 	}
 
 	private void refreshOrCreateMediChart() {
@@ -307,6 +324,9 @@ public class MediRunMainActivity extends FragmentActivity {
 				mMediChart.repaint();
 			}
 		}
+		mediChartLayout.invalidateChild(mMediChart, null);
+		mediChartLayout.invalidate();
+		Log.i(logTag, "Invalidate called!");
 	}
 
 
@@ -323,6 +343,9 @@ public class MediRunMainActivity extends FragmentActivity {
 				mRunChart.repaint();
 			}
 		}
+		runChartLayout.invalidateChild(mRunChart, null);
+		runChartLayout.invalidate();
+		Log.i(logTag, "Invalidate called!");
 		return;
 	}
 
@@ -336,6 +359,31 @@ public class MediRunMainActivity extends FragmentActivity {
 		return true;
 	}
 
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.clearData:
+			Log.i(logTag, "CLEARING ALL DATA...");
+			mediRunStore.clearAllData();
+			Log.i(logTag, "CLEARED ALL DATA!");
+			refreshOrCreateMediChart();
+			refreshOrCreateRunChart();
+			break;
+		case R.id.emailId:
+			break;
+		case R.id.backupData:
+			String email = new String("");
+			String subject = new String("[MediRun Data]");
+			String emailText = new String("Attached.");
+			mediRunStore.prepareDataForEmail(this);
+			mediRunStore.email(this, email, null, subject, emailText);
+			break;
+		default:
+			return super.onOptionsItemSelected(item);
+			
+		}
+		return true;
+	}
 
 	/**
 	 * A {@link FragmentPagerAdapter} that returns a fragment corresponding to one of the primary

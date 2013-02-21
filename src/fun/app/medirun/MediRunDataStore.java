@@ -9,10 +9,15 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.lang.reflect.Type;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
 
@@ -381,6 +386,13 @@ public class MediRunDataStore {
 	   return true;
 	}
 	
+	private String getMapAsJsonString(HashMap mMap) {
+		GsonBuilder gsb = new GsonBuilder();
+		Gson gson = gsb.create();
+		String json = gson.toJson(mMap);
+		return json;
+	}
+	
 	public boolean appendMediData(Date date, Integer mins) {
 		String strDate = getDateAsStringKey(date);
 		mediMap.put(strDate, mins);
@@ -408,6 +420,15 @@ public class MediRunDataStore {
 		return instance;
 	}
 	
+	public void clearAllData() {
+		if (mediMap != null)
+			mediMap.clear();
+		if (runMap != null)
+			runMap.clear();
+		saveMapAsJsonToFile(mediMap, mediFileName);
+		saveMapAsJsonToFile(runMap, runFileName);
+	}
+	
 	public int getMediMinsForDate(int yy, int mm, int dd) {
 		Date d = getDateForYYMMDD(yy, mm, dd);
 		String key = getDateAsStringKey(d);
@@ -423,6 +444,60 @@ public class MediRunDataStore {
 			return runMap.get(key).doubleValue();
 		return 0.0;
 	}
+	
+	// Adapted from : 
+	// https://github.com/stephendnicholas/Android-Apps/blob/master/Gmail%20Attacher/src/com/stephendnicholas/gmailattach/Utils.java
+	private File createJsonFileInCacheUsingMap(Context context, String fileName, HashMap mMap) {
+		File cFile = new File(context.getCacheDir() + File.separator + fileName);
+		try {
+		cFile.createNewFile();
+		FileOutputStream oStream = new FileOutputStream(cFile);
+		OutputStreamWriter osw = new OutputStreamWriter(oStream);
+		PrintWriter pw = new PrintWriter(osw);
+
+		String jsonStr = getMapAsJsonString(mMap);
+		pw.print(jsonStr);
+
+		pw.flush();
+		pw.close();
+		}
+		catch (IOException e) {
+			Log.i(logTag, "IOException thrown");
+		}
+		return cFile;
+	}
+	
+	public void prepareDataForEmail(Context context) {
+		createJsonFileInCacheUsingMap(context, mediFileName, mediMap);
+		createJsonFileInCacheUsingMap(context, runFileName, runMap);
+	}
+	
+	// Adapted from: http://stackoverflow.com/questions/9587559/android-intent-send-an-email-with-attachment
+	public void email (Context context, String emailTo, String emailCC, 
+		    String subject, String emailText)
+	{
+		try {
+		   
+		    final Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND_MULTIPLE);
+		    emailIntent.setType("text/plain");
+		    emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, 
+		        new String[]{emailTo});
+		    emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, subject);
+		    emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, emailText);
+		  
+		    ArrayList<Uri> uris = new ArrayList<Uri>();
+		    
+		    Uri mediUri = Uri.parse("content://" + MediRunContentProvider.auth + "/" + mediFileName);
+		    uris.add(mediUri);
+		    Uri runUri = Uri.parse("content://" + MediRunContentProvider.auth + "/" + runFileName);
+		    uris.add(runUri);
+		    emailIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+		    context.startActivity(emailIntent);
+		}
+		catch (ActivityNotFoundException ae) {
+			Log.i(logTag, "Did not send email! No email activity found");
+		}
+		}
 
 	final class DateIntPair implements Map.Entry<Date, Integer>, Comparable<DateIntPair> {
 		private final Date key;

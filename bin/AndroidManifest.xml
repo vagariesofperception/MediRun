@@ -31,6 +31,11 @@
             android:name=".RunActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" >
         </activity>
+        <provider
+        android:name="MediRunContentProvider"
+        android:authorities="fun.app.medirun"
+        android:exported="true"
+        /> 
     </application>
 
 </manifest>

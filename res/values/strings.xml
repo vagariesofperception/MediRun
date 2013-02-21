@@ -20,4 +20,8 @@
     <string name="runDate">Run Date</string>
     <string name="runMilesText">miles</string>
     <string name="updateTxt">Update</string>
+    <string name="clearDataTxt">Clear All Data</string>
+    <string name="backUpTxt">Email Data</string>
+    <string name="loadDataTxt">Load Data</string>
+    <string name="emailTxt">Enter Email-Id</string>
 </resources>

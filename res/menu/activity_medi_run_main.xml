@@ -1,6 +1,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/menu_settings"
+    <!--  item android:id="@+id/menu_settings"
         android:title="@string/menu_settings"
         android:orderInCategory="100"
-        android:showAsAction="never" />
+        android:showAsAction="never" /-->
+    <item android:id="@+id/emailId"
+        android:title="@string/emailTxt"/>
+    <item android:id="@+id/backupData"
+        android:title="@string/backUpTxt"/>
+    <item android:id="@+id/loadData"
+        android:title="@string/loadDataTxt"/>    
+    <item android:id="@+id/clearData"
+        android:title="@string/clearDataTxt"/>
 </menu>
