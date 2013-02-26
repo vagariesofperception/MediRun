@@ -94,6 +94,8 @@ public class MediRunMainActivity extends FragmentActivity {
 	private XYMultipleSeriesRenderer mRunRenderer = new XYMultipleSeriesRenderer();
 	private TimeSeries mCurrentRunSeries;
 	private XYSeriesRenderer mCurrentRunRenderer;
+	
+	private static final boolean disableClearAllData = true;
 
 	/**
 	 * The {@link android.support.v4.view.PagerAdapter} that will provide fragments for each of the
@@ -281,8 +283,6 @@ public class MediRunMainActivity extends FragmentActivity {
 	@Override
 	public void onResume() {
 		super.onResume();
-		//refreshOrCreateMediChart();
-		//refreshOrCreateRunChart();
 	}
 
 	private void updateMediChart(LinearLayout mcl) {
@@ -364,7 +364,8 @@ public class MediRunMainActivity extends FragmentActivity {
 		switch (item.getItemId()) {
 		case R.id.clearData:
 			Log.i(logTag, "CLEARING ALL DATA...");
-			mediRunStore.clearAllData();
+			if (disableClearAllData == false)
+   			  mediRunStore.clearAllData();
 			Log.i(logTag, "CLEARED ALL DATA!");
 			refreshOrCreateMediChart();
 			refreshOrCreateRunChart();
@@ -375,7 +376,8 @@ public class MediRunMainActivity extends FragmentActivity {
 			String email = new String("");
 			String subject = new String("[MediRun Data]");
 			String emailText = new String("Attached.");
-			mediRunStore.prepareDataForEmail(this);
+			View rLayout = findViewById(R.id.graphLayout);
+			mediRunStore.prepareDataForEmail(this, rLayout);
 			mediRunStore.email(this, email, null, subject, emailText);
 			break;
 		default:
@@ -542,5 +544,5 @@ public class MediRunMainActivity extends FragmentActivity {
 		Log.i(logTag, "onPause called");
 		//mediRunStore.flushMediRunData();
 		super.onPause();
-	}
+	}	
 }
