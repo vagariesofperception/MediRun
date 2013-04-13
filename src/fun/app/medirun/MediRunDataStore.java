@@ -77,12 +77,14 @@ import com.google.gson.reflect.TypeToken;
 public class MediRunDataStore {
 	private static final String mediFileName = "MediData.json";
 	private static final String runFileName = "RunData.json";
+	private static final String pranFileName = "PranData.json";
 	private static final String graphPNGFileName = "MediRunGraph.png";
 	private static final String logTag = "MediRunDataStore";
 	private static volatile MediRunDataStore instance = null;
 	private File mediFile;
 
 	private HashMap<String, Integer> mediMap;
+	private HashMap<String, Integer> pranMap;
 	private HashMap<String, Double> runMap;
 	private Activity mActivity;
 
@@ -103,6 +105,7 @@ public class MediRunDataStore {
 
 	private MediRunDataStore() {
 	}
+	
 
 	public boolean bootUpMediData(Activity mainActivity)
 	{
@@ -133,6 +136,38 @@ public class MediRunDataStore {
 		if (mediMap == null)
 			mediMap = new HashMap<String, Integer>();
 		Log.i(logTag, "Size of mediMap:" + String.valueOf(mediMap.size()));
+		return false;
+	}
+	
+	public boolean bootUpPranData(Activity mainActivity)
+	{
+		Log.i(logTag, "bootUpPranData called!");
+		if (mActivity == null)
+			mActivity = mainActivity;
+		JsonParser parser = new JsonParser();
+		try {
+			FileInputStream fis =  mActivity.openFileInput(pranFileName);
+			BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
+			Object obj = parser.parse(reader);
+			JsonObject jsonObject = (JsonObject) obj;
+			String jStr = jsonObject.toString();
+			Gson gson = new GsonBuilder().create();
+			//.registerTypeAdapter(Date.class, new JsonDateDeSerializer()).create();
+			Type typeOfHashMap = new TypeToken<Map<String, Integer>>() { }.getType();
+			pranMap = gson.fromJson(jStr, typeOfHashMap);
+			return true;
+		}
+		catch (FileNotFoundException e) {
+			Log.i(logTag, "pranFileNotFound");
+			e.printStackTrace();
+		}
+		catch (Exception e) {
+			Log.i(logTag, "some other exception on medi file open");
+			e.printStackTrace();
+		}
+		if (pranMap == null)
+			pranMap = new HashMap<String, Integer>();
+		Log.i(logTag, "Size of pranMap:" + String.valueOf(pranMap.size()));
 		return false;
 	}
 
@@ -194,6 +229,22 @@ public class MediRunDataStore {
 		return oList;		
 	}
 
+	public SortedSet<DateIntPair> getPranDataInOrderInternal() {
+		SortedSet<DateIntPair> oList = new 
+				TreeSet<DateIntPair>();
+		Iterator it = pranMap.entrySet().iterator();
+		while (it.hasNext())
+		{
+			Map.Entry<String, Integer> kv
+			= (Map.Entry<String, Integer>)it.next();
+
+			oList.add(new DateIntPair(getDateForString(kv.getKey()),
+					kv.getValue()));
+		}
+		return oList;		
+	}
+
+	
 	public boolean doesSortedListHaveDate(SortedSet<DateIntPair> sSet, Date current)
 	{
 		Calendar cal = Calendar.getInstance();
@@ -266,6 +317,44 @@ public class MediRunDataStore {
 		return oList;
 	}
 
+	public SortedSet<DateIntPair> getPranDataInOrder() {
+		SortedSet<DateIntPair> oList = getPranDataInOrderInternal();
+		SortedSet<Date> dList = getSortedSetOfDates(oList);
+
+		if (dList.size() == 0)
+			return oList;
+
+		Date first  = dList.first();
+		Date last = dList.last();
+
+		if (first == last)
+			return oList; 
+
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(first);
+		int year = cal.get(Calendar.YEAR);
+		int month = cal.get(Calendar.MONTH);
+		int day = cal.get(Calendar.DAY_OF_MONTH);
+
+		Calendar cl = GregorianCalendar.getInstance();
+		cl.set(year, month, day, 0, 0, 0);
+		Date current = cl.getTime();
+		do {
+			if (doesSortedListHaveDate(oList, current) == false)
+				oList.add(new DateIntPair(current, 0));
+
+			cal.setTime(current);
+			year = cal.get(Calendar.YEAR);
+			month = cal.get(Calendar.MONTH);
+			day = cal.get(Calendar.DAY_OF_MONTH);
+			cl.set(year, month, day, 0, 0, 0);
+			cl.add(Calendar.DATE, 1);
+			current = cl.getTime();
+			Log.i(logTag, "Current:" + current.toString());
+		} while (current != null && current.before(last));
+		return oList;
+	}
+	
 	public SortedSet<DateDoublePair> getRunDataInOrderInternal() {
 		SortedSet<DateDoublePair> oList = new 
 				TreeSet<DateDoublePair>();
@@ -397,10 +486,13 @@ public class MediRunDataStore {
 		return json;
 	}
 
-	public boolean appendMediData(Date date, Integer mins) {
+	public boolean appendMediData(Date date, Integer mediMins, Integer pranaMins) {
 		String strDate = getDateAsStringKey(date);
-		mediMap.put(strDate, mins);
-		return saveMapAsJsonToFile(mediMap, mediFileName);
+		mediMap.put(strDate, mediMins);
+		pranMap.put(strDate, pranaMins);
+		saveMapAsJsonToFile(mediMap, mediFileName);
+		saveMapAsJsonToFile(pranMap, pranFileName);
+		return true;
 	}
 
 	public boolean appendRunData(Date date, Double miles) {
@@ -411,6 +503,7 @@ public class MediRunDataStore {
 
 	public void flushMediRunData() {
 		saveMapAsJsonToFile(mediMap, mediFileName);
+		saveMapAsJsonToFile(pranMap, pranFileName);
 		saveMapAsJsonToFile(runMap, runFileName);
 	}
 
@@ -427,9 +520,12 @@ public class MediRunDataStore {
 	public void clearAllData() {
 		if (mediMap != null)
 			mediMap.clear();
+		if (pranMap != null)
+			pranMap.clear();
 		if (runMap != null)
 			runMap.clear();
 		saveMapAsJsonToFile(mediMap, mediFileName);
+		saveMapAsJsonToFile(pranMap, pranFileName);
 		saveMapAsJsonToFile(runMap, runFileName);
 	}
 
@@ -440,6 +536,15 @@ public class MediRunDataStore {
 			return mediMap.get(key).intValue();
 		return 0;
 	}
+	
+	public int getPranMinsForDate(int yy, int mm, int dd) {
+		Date d = getDateForYYMMDD(yy, mm, dd);
+		String key = getDateAsStringKey(d);
+		if (pranMap.containsKey(key))
+			return pranMap.get(key).intValue();
+		return 0;
+	}
+
 
 	public double getRunMilesForDate(int yy, int mm, int dd) {
 		Date d = getDateForYYMMDD(yy, mm, dd);
@@ -498,6 +603,7 @@ public class MediRunDataStore {
 
 	public void prepareDataForEmail(Context context, View rLayout) {
 		createJsonFileInCacheUsingMap(context, mediFileName, mediMap);
+		createJsonFileInCacheUsingMap(context, pranFileName, pranMap);
 		createJsonFileInCacheUsingMap(context, runFileName, runMap);
 		createPNGForGraph(context, graphPNGFileName, rLayout);
 	}
@@ -519,6 +625,8 @@ public class MediRunDataStore {
 
 			Uri mediUri = Uri.parse("content://" + MediRunContentProvider.auth + "/" + mediFileName);
 			uris.add(mediUri);
+			Uri pranUri = Uri.parse("content://" + MediRunContentProvider.auth + "/" + pranFileName);
+			uris.add(pranUri);
 			Uri runUri = Uri.parse("content://" + MediRunContentProvider.auth + "/" + runFileName);
 			uris.add(runUri);
 			Uri graphUri = Uri.parse("content://" + MediRunContentProvider.auth + "/" + graphPNGFileName);

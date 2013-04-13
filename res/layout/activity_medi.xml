@@ -50,12 +50,12 @@
             android:paddingTop="20dp" >
 
             <TextView
-                android:id="@+id/mediEmpty2"
-                android:layout_width="5sp"
+                android:id="@+id/mediBannerText"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.30"
                 android:background="@color/medi_color_bkgnd"
-                android:textColor="@color/medi_color_bkgnd"
+                android:textColor="@color/medi_color_fgnd"
                 android:textSize="15sp" />
 
             <EditText
@@ -70,6 +70,41 @@
 
             <TextView
                 android:id="@+id/mediMinText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.30"
+                android:background="@color/medi_color_bkgnd"
+                android:paddingLeft="5dp"
+                android:text="@string/mediDateMinText"
+                android:textColor="@color/medi_color_fgnd"
+                android:textSize="15sp" />
+        </TableRow>
+        
+         <TableRow
+            android:layout_weight="0.20"
+            android:paddingTop="20dp" >
+
+            <TextView
+                android:id="@+id/pranBannerText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.30"
+                android:background="@color/medi_color_bkgnd"
+                android:textColor="@color/medi_color_fgnd"
+                android:textSize="15sp" />
+
+            <EditText
+                android:id="@+id/pranMins"
+                android:layout_weight="0.40"
+                android:background="@drawable/edittext_bg"
+                android:gravity="right"
+                android:imeOptions="actionDone"
+                android:inputType="number"
+                android:textColor="@color/medi_color_fgnd"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/pranMinText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.30"

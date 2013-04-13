@@ -78,7 +78,7 @@ public class RunActivity extends Activity implements TextView.OnEditorActionList
 		cal.set(currentYear, currentMonth, currentDay);
 		d = cal.getTime();
 		currentDate = d;
-		String strDate = DateFormat.format("MMMM dd, yyyy", d).toString();
+		String strDate = DateFormat.format("EEE MMMM dd, yyyy", d).toString();
 		runDateVal.setText(strDate);
 
 

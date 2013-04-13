@@ -65,14 +65,20 @@ public class MediRunMainActivity extends FragmentActivity {
 	public final static String MEDIMAP = "fun.app.medirun.MEDIMAP";
 	public final static String CURRENT_MEDI_DATE = "fun.app.medirun.CURRENT_MEDI_DATE";
 	public final static String CURRENT_MEDI_MINS = "fun.app.medirun.CURRENT_MEDI_MINS";
+	public final static String CURRENT_PRAN_MINS = "fun.app.medirun.CURRENT_PRAN_MINS";
+	
 	public final static String EXISTING_MEDIMINS = "fun.app.medirun.EXISTING_MEDMINS";
+	public final static String EXISTING_PRANMINS = "fun.app.medirun.EXISTING_PRANMINS";
 	public final static String EXISTING_RUNMILES = "fun.app.medirun.EXISTING_RUNMILES";
 
 
 	public final static String CURRENT_RUN_DATE = "fun.app.medirun.CURRENT_RUN_DATE";
 	public final static String CURRENT_RUN_MILES = "fun.app.medirun.CURRENT_RUN_MILES";
+	
 
 	public final static String logTag = "MediRunMainActivity";
+	private Date currentMinMediDate;
+	private Date currentMaxMediDate;
 
 
 	private MediRunDataStore mediRunStore;
@@ -89,6 +95,9 @@ public class MediRunMainActivity extends FragmentActivity {
 	private XYMultipleSeriesRenderer mMediRenderer = new XYMultipleSeriesRenderer();
 	private TimeSeries mCurrentMediSeries;
 	private XYSeriesRenderer mCurrentMediRenderer;
+	private XYSeriesRenderer mCurrentPranRenderer;
+	
+	private TimeSeries mCurrentPranSeries;
 
 	private XYMultipleSeriesDataset mRunDataset = new XYMultipleSeriesDataset();
 	private XYMultipleSeriesRenderer mRunRenderer = new XYMultipleSeriesRenderer();
@@ -110,12 +119,17 @@ public class MediRunMainActivity extends FragmentActivity {
 	 */
 	ViewPager mViewPager;
 
-
+    // Intialization methods for each chart - creates
+	// new data sets; 
 	private void initMediChart() {
 		mCurrentMediSeries = new TimeSeries("Meditation minutes");
 		mMediDataset.addSeries(mCurrentMediSeries);
+		mCurrentPranSeries = new TimeSeries("Pranayama minutes");
+		mMediDataset.addSeries(mCurrentPranSeries);
 		mCurrentMediRenderer = new XYSeriesRenderer();
+		mCurrentPranRenderer = new XYSeriesRenderer();
 		mMediRenderer.addSeriesRenderer(mCurrentMediRenderer);
+		mMediRenderer.addSeriesRenderer(mCurrentPranRenderer);
 		//setChartProperties(mMediRenderer, mCurrentMediRenderer, null, null, new String("Meditation Mins"), Color.RED, PointStyle.DIAMOND);
 	}
 
@@ -181,7 +195,49 @@ public class MediRunMainActivity extends FragmentActivity {
 		if (minDate == null || maxDate == null)
 			return false;
 		Log.i(logTag, "minDate:" + minDate.toString() + ", maxDate:" + maxDate.toString());
+		currentMinMediDate = minDate;
+		currentMaxMediDate = maxDate;
 		setChartProperties(mMediRenderer, mCurrentMediRenderer, minDate, maxDate, new String("Meditation Mins"), Color.RED, PointStyle.DIAMOND);
+		return true;
+
+	}
+	
+	private boolean addPranData() {
+
+		SortedSet<MediRunDataStore.DateIntPair> oList =
+				mediRunStore.getPranDataInOrder();
+		Iterator<MediRunDataStore.DateIntPair> it = oList.iterator();
+		Date minDate=null, maxDate=null;
+
+		if (oList.size() == 0)
+			return false;
+		mCurrentPranSeries.clear();
+		while (it.hasNext())
+		{
+			Entry<Date, Integer> pair = it.next();
+			if (minDate == null)
+				minDate = pair.getKey();
+			else if (pair.getKey().getTime() < minDate.getTime())
+				minDate = pair.getKey();
+
+
+			Log.i(logTag, "Mx:" + pair.getKey().toString() + " My:" + pair.getValue().doubleValue());
+			mCurrentPranSeries.add(pair.getKey(), pair.getValue().doubleValue());
+
+
+			if (maxDate == null)
+				maxDate = pair.getKey();
+			else if (maxDate.getTime() < pair.getKey().getTime())
+				maxDate = pair.getKey();
+		}
+		if (minDate == null || maxDate == null)
+			return false;
+		Log.i(logTag, "minDate:" + minDate.toString() + ", maxDate:" + maxDate.toString());
+		if (currentMinMediDate != null && currentMinMediDate.before(minDate))
+			minDate = currentMinMediDate;
+		if (currentMaxMediDate != null && currentMaxMediDate.after(maxDate))
+			maxDate = currentMaxMediDate;
+		setChartProperties(mMediRenderer, mCurrentPranRenderer, minDate, maxDate, new String("Pranayam Mins"), Color.BLUE, PointStyle.X);
 		return true;
 
 	}
@@ -242,6 +298,7 @@ public class MediRunMainActivity extends FragmentActivity {
 		{
 			mediRunStore = MediRunDataStore.getInstance();
 			mediRunStore.bootUpMediData(this);
+			mediRunStore.bootUpPranData(this);
 			mediRunStore.bootUpRunData(this);
 		}
 		mViewPager.setOnPageChangeListener(new OnPageChangeListener() {
@@ -290,6 +347,7 @@ public class MediRunMainActivity extends FragmentActivity {
 			mcl.removeView(mMediChart);
 
 		boolean hasData = addMediData();
+		addPranData();
 		mMediChart = ChartFactory.getTimeChartView(
 				this,
 				mMediDataset, 
@@ -465,6 +523,9 @@ public class MediRunMainActivity extends FragmentActivity {
 							int mins = mediRunStore.getMediMinsForDate(year, month, dayOfMonth);
 							if (mins != 0)
 								intent.putExtra(EXISTING_MEDIMINS, String.valueOf(mins));
+							int pranMins = mediRunStore.getPranMinsForDate(year, month, dayOfMonth);
+							if (pranMins != 0)
+								intent.putExtra(EXISTING_PRANMINS, String.valueOf(pranMins));
 							getActivity().startActivityForResult(intent, MEDI_ACTIVITY);
 
 						}
@@ -522,11 +583,14 @@ public class MediRunMainActivity extends FragmentActivity {
 
 		if (resultCode == RESULT_OK && requestCode == MEDI_ACTIVITY) {
 			Date currentDate = (Date)data.getSerializableExtra(CURRENT_MEDI_DATE);
-			String s = data.getStringExtra(CURRENT_MEDI_MINS);
-			Integer currentMins = new Integer(s);
+			String s1 = data.getStringExtra(CURRENT_MEDI_MINS);
+			String s2 = data.getStringExtra(CURRENT_PRAN_MINS);
+			
+			Integer currentMediMins = new Integer(s1);
+			Integer currentPranMins = new Integer(s2);
 			Log.i(logTag, "onActivityResult: Got current date " + currentDate.toString() + " CurrentMins:" +
-					s);
-			mediRunStore.appendMediData(currentDate, currentMins);
+					s1);
+			mediRunStore.appendMediData(currentDate, currentMediMins, currentPranMins);
 			//refreshOrCreateMediChart();
 		} else if (resultCode == RESULT_OK && requestCode == RUN_ACTIVITY) {
 			Date currentDate = (Date)data.getSerializableExtra(CURRENT_RUN_DATE);
