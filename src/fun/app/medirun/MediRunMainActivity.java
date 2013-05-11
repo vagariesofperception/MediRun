@@ -35,6 +35,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.NavUtils;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -138,6 +139,7 @@ public class MediRunMainActivity extends FragmentActivity {
 		mRunDataset.addSeries(mCurrentRunSeries);
 		mCurrentRunRenderer = new XYSeriesRenderer();
 		mRunRenderer.addSeriesRenderer(mCurrentRunRenderer);
+		mRunRenderer.setXLabels(0);
 		//setChartProperties(mRunRenderer, mCurrentRunRenderer, null, null, new String("Run Miles"), Color.GREEN, PointStyle.CIRCLE);	
 	}
 	
@@ -237,15 +239,24 @@ public class MediRunMainActivity extends FragmentActivity {
 			minDate = currentMinMediDate;
 		if (currentMaxMediDate != null && currentMaxMediDate.after(maxDate))
 			maxDate = currentMaxMediDate;
-		setChartProperties(mMediRenderer, mCurrentPranRenderer, minDate, maxDate, new String("Pranayam Mins"), Color.BLUE, PointStyle.X);
+		setChartProperties(mMediRenderer, mCurrentPranRenderer, minDate, maxDate, new String("Pranayam Mins"), Color.BLUE, PointStyle.CIRCLE);
 		return true;
 
 	}
 
+	private String getDateAsStr(Date d)
+	{
+		String strDate = DateFormat.format("MMM dd, yyyy", d).toString();
+		return strDate;
+	}
+	
 	private boolean addRunData() {
 
 		SortedSet<MediRunDataStore.DateDoublePair> oList =
 				mediRunStore.getRunDataInOrder();
+		//int size = oList.size();
+		//int chunk = size/5;
+		
 		Iterator<MediRunDataStore.DateDoublePair> it = oList.iterator();
 		Date minDate=null, maxDate=null;
 		double maxMiles = -1.0;
@@ -253,9 +264,14 @@ public class MediRunMainActivity extends FragmentActivity {
 		if (oList.size() == 0)
 			return false;
 		mCurrentRunSeries.clear();
+		int cnt = 0;
 		while (it.hasNext())
 		{
 			Entry<Date, Double> pair = it.next();
+
+			//if (chunk!= 0 && cnt%chunk == 0)
+			//	mRunRenderer.addXTextLabel(pair.getKey().getTime(), getDateAsStr(pair.getKey()));
+		
 			if (minDate == null)
 				minDate = pair.getKey();
 			else if (pair.getKey().getTime() < minDate.getTime())
@@ -360,11 +376,17 @@ public class MediRunMainActivity extends FragmentActivity {
 		if (mRunChart != null)
 			rcl.removeView(mRunChart);
 		boolean hasData = addRunData();
+
 		mRunChart = ChartFactory.getTimeChartView(
 				this,
 				mRunDataset, 
 				mRunRenderer, "MMM dd, yyyy");
-				//null);
+		
+		/*mRunChart = ChartFactory.getBarChartView(
+				this,
+				mRunDataset, 
+				mRunRenderer, Type.STACKED);
+				//null);*/
 		rcl.addView(mRunChart);
 		
 	}
