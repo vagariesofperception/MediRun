@@ -139,7 +139,7 @@ public class MediRunMainActivity extends FragmentActivity {
 		mRunDataset.addSeries(mCurrentRunSeries);
 		mCurrentRunRenderer = new XYSeriesRenderer();
 		mRunRenderer.addSeriesRenderer(mCurrentRunRenderer);
-		mRunRenderer.setXLabels(0);
+		//mRunRenderer.setXLabels(0);
 		//setChartProperties(mRunRenderer, mCurrentRunRenderer, null, null, new String("Run Miles"), Color.GREEN, PointStyle.CIRCLE);	
 	}
 	
